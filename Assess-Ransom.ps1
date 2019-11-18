@@ -484,7 +484,7 @@ function Assess-UserRansom {
 
     	## -- Execute The PowerShell Code and Update the Status of the Progress-Bar
 
-    	$Result = Get-ChildItem -Path $Paths -Include $fileExtensions -Recurse -Force -ErrorAction SilentlyContinue | Select-Object Name, @{Name="Path";Expression={$_.FullName}}
+    	$Result = Get-ChildItem -Path $Paths -Include $fileExtensions -Recurse -Force -ErrorAction SilentlyContinue | Select-Object Name, @{Name="Path";Expression={$_.FullName}}, @{n="SizeMB";e={[int]($_.length/1MB)}}
     	$Counter = 0
     	ForEach ($Item In $Result) {
     		## -- Calculate The Percentage Completed
@@ -494,7 +494,8 @@ function Assess-UserRansom {
     		$ObjLabel.Text = "Encrypting Files for $env:Username"
             $ObjLabel2.Text = "Current file: " + $Item.Name
     		$ObjForm.Refresh()
-    		Start-Sleep -Milliseconds 5
+		#Take the file size and use it to vary the length of time shown in the window
+    		Start-Sleep -milliseconds ($Item.SizeMB * 10)
     		# -- $Item.Name
     		#Remove below comment for troubleshooting path in PS window
             #"`t" + $Item.Path
