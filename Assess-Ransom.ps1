@@ -101,6 +101,67 @@ function isadmin
    ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
  }
 
+function Sample-Extensions{
+ <#
+        .SYNOPSIS
+
+            This function gathers n Number of files and provides a sample of the types of files found.
+
+        .PARAMETER samplesize
+
+            Integer of how many files to sample.
+
+        .PARAMETER samplesize
+
+            Integer of how many files to sample.
+
+        .PARAMETER greaterthan
+
+            For the report, the count must be greater than this integer. Default is greater than 1.
+
+        .PARAMETER
+
+            Must be a string or an array of exclude strings. Default is none. Example is @("*.doc*","*.txt","*.xls*","*.png","*.jpg","*.jpeg","*.pdf","*.csv","*.tiff")
+
+        .PARAMETER Paths
+
+            Must be an array of Paths. By default, uses @("C:\Users\*\Documents","C:\Users\*\Dropbox","C:\Users\*\Desktop","C:\Users\*\OneDrive","C:\Users\*\Box Sync")
+
+    #>
+
+    [CmdletBinding()]
+    param(
+        [Parameter(Position=0,ValueFromPipelineByPropertyName,ValueFromPipeline=$True)]
+        [ValidateScript({Test-Path -Path $_ })]
+        [Alias('folder')]
+        [String[]]
+        $Paths = @("C:\Users\*\Documents","C:\Users\*\Dropbox","C:\Users\*\Desktop","C:\Users\*\OneDrive","C:\Users\*\Box Sync"),
+
+        [Alias('n')]
+        [Alias('sample')]
+        [int]
+        $samplesize = 100,
+
+        [Alias('gt')]
+        [Alias('greater')]
+        [int]
+        $greaterthan = 1,
+
+        [Alias('x')]
+        [Alias('exclude')]
+        [string[]]
+        $ExcludeExtensions = ""
+    )
+
+    Write-Host "Gathering File List, Please wait. . ." -InformationAction Continue
+    $Files = Get-ChildItem -Path $Paths -Exclude $ExcludeExtensions -Recurse -Force -ErrorAction SilentlyContinue | Select-Object -First $samplesize
+    Write-Host "Found $($Files.count). Processing files for report. . ." -InformationAction Continue
+    
+    Write-Host "`n`nReport Summary" -InformationAction Continue
+    $summary = $Files | Group-Object Extension -NoElement | Select-Object Name, Count | ? {$_.count -gt $greaterthan} | Sort-Object -Property Count -Descending | Out-String
+    Write-Host "$($summary)" -InformationAction Continue
+}
+
 function Gather-Files{
     <#
         .SYNOPSIS
