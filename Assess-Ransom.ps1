@@ -192,9 +192,11 @@ function Gather-Files{
     )
 
     Write-Host "Gathering File List, Please wait. . ." -InformationAction Continue
-    $Result = Get-ChildItem -Path $Paths -Include $fileExtensions -Recurse -Force -ErrorAction SilentlyContinue | Select-Object Name, Extension, @{n="UserWritable";e={Test-WriteFile -Path $_.FullName}}, @{Name="Path";Expression={$_.FullName}}, @{n="SizeKB";e={[string]::Format("{0:0.00} kB", $_.length/1KB)}}, @{n="Computername";e={$env:COMPUTERNAME}}, @{n="AsUser";e={$env:Username}}
+    $Files = Get-ChildItem -Path $Paths -Include $fileExtensions -Recurse -Force -ErrorAction SilentlyContinue 
+    Write-Host "Found $($Files.count). Processing files for report. . ." -InformationAction Continue
+    $Result = $Files | Select-Object Name, Extension, @{n="UserWritable";e={Test-WriteFile -Path $_.FullName}}, @{Name="Path";Expression={$_.FullName}}, @{n="SizeKB";e={[string]::Format("{0:0.00} kB", $_.length/1KB)}}, @{n="Computername";e={$env:COMPUTERNAME}}, @{n="AsUser";e={$env:Username}}
     Write-Host "Gathered list of $($Result.count) files" -InformationAction Continue
-
+    
     #Generate Output of files found to screen, but not pipeline
     Write-Host "`n`nReport Summary" -InformationAction Continue
     $summary = $Result | Group-Object Extension -NoElement | Select-Object Name, Count | Sort-Object -Property Count -Descending | Out-String
