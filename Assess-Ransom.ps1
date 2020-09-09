@@ -188,7 +188,7 @@ function Gather-Files{
 
         [Alias('extensions')]
         [String[]]
-        $fileExtensions = @("*.doc*","*.txt","*.xls*","*.png","*.jpg","*.jpeg","*.pdf","*.csv","*.tiff")
+        $fileExtensions = @("*.doc*","*.txt","*.xls*","*.png","*.jpg","*.jpeg","*.pdf","*.csv","*.tiff","*.acc*","*.laccdb")
     )
 
     Write-Host "Gathering File List, Please wait. . ." -InformationAction Continue
