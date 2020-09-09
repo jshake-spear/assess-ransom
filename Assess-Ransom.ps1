@@ -170,7 +170,7 @@ function Gather-Files{
 
         .PARAMETER fileExtensions
 
-            Must be an array of extensions. By default, uses @("*.doc*","*.txt","*.xls*","*.png","*.jpg","*.jpeg","*.pdf","*.csv","*.tiff")
+            Must be an array of extensions. By default, uses @("*.doc*","*.txt","*.xls*","*.png","*.jpg","*.jpeg","*.pdf","*.csv","*.tiff","*.acc*","*.laccdb")
 
         .PARAMETER Paths
 
