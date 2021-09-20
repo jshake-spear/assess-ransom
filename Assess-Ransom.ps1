@@ -29,6 +29,26 @@
 
 #>
 
+#https://stackoverflow.com/questions/17605364/how-can-i-use-write-progress-in-a-pipeline-function
+function Show-ProgressV3{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+        [PSObject[]]$InputObject,
+        [string]$Activity = "Processing items"
+    )
+
+        [int]$TotItems = $Input.Count
+        [int]$Count = 0
+
+        $Input|foreach {
+            $_
+            $Count++
+            [int]$percentComplete = ($Count/$TotItems* 100)
+            Write-Progress -Activity $Activity -PercentComplete $percentComplete -Status ("Working - " + $percentComplete + "%")
+        }
+}
+
 Function Get-RegistryKeyPropertiesAndValues{
 
   <#
@@ -192,17 +212,15 @@ function Gather-Files{
     )
 
     Write-Host "Gathering File List, Please wait. . ." -InformationAction Continue
-    $Files = Get-ChildItem -Path $Paths -Include $fileExtensions -Recurse -Force -ErrorAction SilentlyContinue 
-    Write-Host "Found $($Files.count). Processing files for report. . ." -InformationAction Continue
-    $Result = $Files | Select-Object Name, Extension, @{n="UserWritable";e={Test-WriteFile -Path $_.FullName}}, @{Name="Path";Expression={$_.FullName}}, @{n="SizeKB";e={[string]::Format("{0:0.00} kB", $_.length/1KB)}}, @{n="Computername";e={$env:COMPUTERNAME}}, @{n="AsUser";e={$env:Username}}
-    Write-Host "Gathered list of $($Result.count) files" -InformationAction Continue
+    $Files = Get-ChildItem -Path $Paths -Include $fileExtensions -Recurse -Force -ErrorAction SilentlyContinue | Show-ProgressV3 -Activity "Gathering Files" | Select-Object Name, Extension, @{n="UserWritable";e={Test-WriteFile -Path $_.FullName}}, @{Name="Path";Expression={$_.FullName}}, @{n="SizeKB";e={[string]::Format("{0:0.00} kB", $_.length/1KB)}}, @{n="Computername";e={$env:COMPUTERNAME}}, @{n="AsUser";e={$env:Username}}    
+    Write-Host "Gathered list of $($Files.count) files" -InformationAction Continue
     
     #Generate Output of files found to screen, but not pipeline
     Write-Host "`n`nReport Summary" -InformationAction Continue
-    $summary = $Result | Group-Object Extension -NoElement | Select-Object Name, Count | Sort-Object -Property Count -Descending | Out-String
+    $summary = $Files | Group-Object Extension -NoElement | Select-Object Name, Count | Sort-Object -Property Count -Descending | Out-String
     Write-Host "$($summary)" -InformationAction Continue
 
-    return $Result
+    return $Files
 
 }
 
