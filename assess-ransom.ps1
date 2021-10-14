@@ -203,7 +203,7 @@ function Test-WriteFile{
             $testwrite = Get-ChildItem -Path $Path -Include $fileExtensions -File -Recurse -Force -ErrorAction SilentlyContinue | Select-Object -f 1
             #$testwrite
             [io.file]::OpenWrite($testwrite).close()
-            Write-Information "Successfully writes $testwrite"
+            #Write-Information "Successfully writes $testwrite"
             #$testwrite
             return $true
         }
